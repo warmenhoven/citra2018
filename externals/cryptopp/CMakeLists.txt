@@ -235,6 +235,15 @@ endif()
 add_library(cryptopp STATIC ${cryptopp_SOURCES})
 target_include_directories(cryptopp INTERFACE .)
 
+# cpu.cpp includes "cpu-features.h" on Android and calls into it. The NDK ships
+# both the header and its implementation as source, for the project to build.
+if (ANDROID)
+    target_sources(cryptopp PRIVATE
+        ${CMAKE_ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c)
+    target_include_directories(cryptopp PRIVATE
+        ${CMAKE_ANDROID_NDK}/sources/android/cpufeatures)
+endif()
+
 #============================================================================
 # Third-party libraries
 #============================================================================

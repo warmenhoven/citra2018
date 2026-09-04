@@ -32,6 +32,15 @@ include:
   - project: 'libretro-infrastructure/ci-templates'
     file: '/linux-cmake.yml'
 
+  # MacOS ARM 64-bit
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/osx-cmake-arm64.yml'
+
+  ################################## CELLULAR ################################
+  # Android
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/android-cmake.yml'
+
   #################################### MISC ##################################
   # webOS 32-bit (LGTV)
   - project: 'libretro-infrastructure/ci-templates'
@@ -64,6 +73,39 @@ libretro-build-linux-aarch64:
   extends:
     - .libretro-linux-cmake-aarch64
     - .core-linux-defs
+
+# MacOS ARM 64-bit
+libretro-build-osx-arm64:
+  extends:
+    - .libretro-osx-cmake-arm64
+    - .core-defs
+  variables:
+    CORE_ARGS: "-DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_CXX_FLAGS=-Wno-invalid-specialization"
+
+################################### CELLULAR #################################
+# Android ARMv8a
+#
+# API 28 rather than the template's 21: bionic only grew iconv there, and
+# src/common/string_util.cpp needs it. The two CMake arguments are for the
+# externals - nihstro specialises std::make_unsigned, which clang refuses
+# since 19, and the NDK toolchain file otherwise keeps find_package from
+# looking outside the sysroot, where the in-tree boost lives.
+.core-defs-android:
+  extends: .core-defs
+  variables:
+    API_LEVEL: 28
+    CORE_ARGS: "-DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_CXX_FLAGS=-Wno-invalid-specialization -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH"
+
+android-arm64-v8a:
+  extends:
+    - .libretro-android-cmake-arm64-v8a
+    - .core-defs-android
+
+# Android 64-bit x86
+android-x86_64:
+  extends:
+    - .libretro-android-cmake-x86_64
+    - .core-defs-android
 
 #################################### MISC ##################################
 # webOS 32-bit
